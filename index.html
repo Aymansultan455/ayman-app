@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" style="height:100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر سوبر ماركت </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        :root {
+            --jo: #f68b1e; --jo-dk: #e07000; --jo-red: #c41230;
+            --jo-bg: #f5f5f5; --jo-white: #ffffff; --jo-gray: #e8e8e8;
+            --jo-text: #1a1a1a; --jo-blue: #03045e; --jo-green: #1a9e5c;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Cairo','Segoe UI',Tahoma,sans-serif; background: var(--jo-bg); color: var(--jo-text); margin:0; }
+
+        /* === كروت المنتجات - نمط جوميا === */
+        .product-card { background: var(--jo-white); border: 1px solid #e0e0e0; border-radius: 10px; transition: transform 0.2s,box-shadow 0.2s; box-shadow: 0 1px 5px rgba(0,0,0,0.07); }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.13); border-color: var(--jo); }
+        .text-main-black { color: var(--jo-text); }
+        .text-navy-blue  { color: var(--jo-blue); }
+        .text-dark-green { color: var(--jo-green); }
+
+        /* === تبويبات الأقسام - نمط جوميا === */
+        .active-tab { background: var(--jo) !important; color: #fff !important; font-weight: bold; border-color: var(--jo) !important; }
+        #categories-nav { display:flex; gap:8px; overflow-x:auto; padding:10px 16px; scroll-behavior:smooth; -webkit-overflow-scrolling:touch; }
+        #categories-nav::-webkit-scrollbar { height:5px; }
+        #categories-nav::-webkit-scrollbar-track { background:#f0f0f0; border-radius:4px; }
+        #categories-nav::-webkit-scrollbar-thumb { background:var(--jo); border-radius:4px; }
+        #categories-nav { scrollbar-width:thin; scrollbar-color:var(--jo) #f0f0f0; }
+        #categories-nav button { background:#fff; border:1.5px solid #ccc; color:#111; border-radius:22px; padding:7px 18px; font-size:13px; font-weight:700; white-space:nowrap; cursor:pointer; transition:all 0.2s; font-family:'Cairo',sans-serif; text-shadow:0 0 6px rgba(0,0,0,0.5),0 0 1px #000; }
+        #categories-nav button:hover { border-color:var(--jo); color:var(--jo); }
+
+        /* === الشريط المتحرك === */
+        marquee { background: var(--jo); color:#fff; font-weight:bold; padding:8px 0; font-size:13px; }
+
+        /* === سعر الكروت === */
+        .price-badge { background:var(--jo-blue)!important; color:#fff!important; border-radius:6px; padding:4px 8px; font-weight:900; text-align:center; }
+
+        /* === شريط إخفاء عام === */
+        .scrollbar-hide::-webkit-scrollbar { display:none; }
+        .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+
+        /* === إصلاح توسيط النوافذ على جوجل سايتس === */
+        .win-modal-overlay {
+            position: fixed !important;
+            top: 0 !important; left: 0 !important;
+            width: 100vw !important; height: 100vh !important;
+            background: rgba(0,0,0,0.65) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 999999 !important;
+            padding: 1rem !important;
+            overflow-y: auto !important;
+        }
+        .win-modal-overlay.hidden { display: none !important; }
+        .win-window { border:2px solid #7a7a7a!important; border-radius:8px!important; overflow:hidden!important; box-shadow:4px 4px 16px rgba(0,0,0,0.5)!important; margin:auto; }
+        .win-titlebar { background:linear-gradient(180deg,#1e5fa8 0%,#1446a0 40%,#0d3a8a 100%); padding:6px 10px; display:flex; align-items:center; justify-content:space-between; user-select:none; border-bottom:1px solid #0a2d6e; }
+        .win-titlebar .win-title { font-size:12px; font-weight:bold; color:#fff; display:flex; align-items:center; gap:6px; font-family:'Cairo',sans-serif; }
+        .win-controls { display:flex; gap:4px; }
+        .win-btn { width:18px; height:18px; border-radius:3px; border:1px solid rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; cursor:pointer; transition:filter 0.1s; }
+        .win-btn:hover { filter:brightness(1.2); }
+        .win-btn-min   { background:linear-gradient(180deg,#f5d56b,#d4a017); color:#4a2c00; }
+        .win-btn-max   { background:linear-gradient(180deg,#8fc75a,#5a9c1e); color:#1a3a00; }
+        .win-btn-close { background:linear-gradient(180deg,#f5736a,#c0392b); color:#fff; }
+        .win-body { background:#0f3023; }
+
+        /* === شريط التوقيع أسفل كل نافذة === */
+        .designer-bar { background:linear-gradient(90deg,#0d3a8a 0%,#1e5fa8 50%,#0d3a8a 100%); color:#fff; text-align:center; padding:7px 12px; font-size:11px; font-weight:700; letter-spacing:0.5px; font-family:'Georgia','Times New Roman',serif; border-top:1px solid rgba(255,255,255,0.2); }
+        .designer-bar span { color:#ffd700; font-style:italic; }
+
+        /* === التوقيع الرئيسي نيون === */
+
+        @keyframes flashNeon {
+            0%,100% { text-shadow: 0 0 4px #fff, 0 0 10px #fff, 0 0 18px #fff, 0 0 32px #ffe066, 0 0 50px #ffe066; opacity:1; }
+            50%      { text-shadow: 0 0 2px #fff, 0 0 5px #ffe066; opacity:0.7; }
+        }
+        .neon-signature { 
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 30;
+            text-align: center;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .neon-signature p { font-size:12px; font-weight:bold; color:#fff; text-shadow:0 0 5px #fff,0 0 10px #fff,0 0 20px #00e5ff; letter-spacing:1px; line-height:1.7; font-family:'Cairo',sans-serif; margin:0; display:inline; }
+    </style>
+</head>
+<body class="min-h-screen relative overflow-x-hidden" style="min-height:100%; padding-bottom:48px;">
+
+    <header style="background:#f68b1e; box-shadow:0 3px 10px rgba(0,0,0,0.2); position:sticky; top:0; z-index:40; padding:0;">
+        <div style="max-width:1400px; margin:0 auto; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <!-- اللوجو والعنوان مكبّر -->
+            <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.15); border-radius:12px; padding:8px 16px;">
+                <div style="background:rgba(255,255,255,0.25); border-radius:50%; width:52px; height:52px; display:flex; align-items:center; justify-content:center; border:2px solid rgba(255,255,255,0.5);">
+                    <i class="fas fa-store" style="font-size:1.8rem; color:#fff;"></i>
+                </div>
+                <div>
+                    <h1 id="app-display-name" style="font-size:1.5rem; font-weight:900; color:#fff; margin:0; line-height:1.2; font-family:'Cairo',sans-serif; text-shadow:0 1px 3px rgba(0,0,0,0.2);">
+                        <span>متجر سوبر ماركت</span>
+                    </h1>
+                    <p id="flash-tagline" style="font-size:11px; margin:0; font-family:'Cairo',sans-serif; font-weight:700; color:#fff; animation:flashNeon 1.6s ease-in-out infinite;">🛒 تسوّق بكل سهولة وأمان</p>
+                </div>
+            </div>
+            <!-- أزرار الهيدر -->
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button onclick="toggleCartSidebar()" style="position:relative; background:#fff; color:#f68b1e; font-weight:bold; padding:10px 18px; border-radius:25px; border:none; cursor:pointer; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.15); display:flex; align-items:center; gap:6px; font-family:'Cairo',sans-serif;">
+                    <i class="fas fa-shopping-cart"></i> السلة
+                    <span id="cart-count" style="position:absolute; top:-6px; left:-6px; background:#c41230; color:#fff; font-size:11px; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid #fff;">0</span>
+                </button>
+                <button onclick="openLoginModal()" style="background:rgba(255,255,255,0.2); color:#fff; font-weight:bold; padding:10px 16px; border-radius:25px; border:1.5px solid rgba(255,255,255,0.5); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; font-family:'Cairo',sans-serif; backdrop-filter:blur(4px);">
+                    <i class="fas fa-user-shield"></i> الإدارة
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- شريط الأقسام fixed -->
+    <div id="cats-bar" style="background:#fff; border-bottom:2px solid #f68b1e; box-shadow:0 2px 6px rgba(0,0,0,0.07); position:sticky; top:0; z-index:39; position:-webkit-sticky;">
+        <button onclick="document.getElementById('categories-nav').scrollBy({left:-150,behavior:'smooth'})" 
+            style="position:absolute; right:0; top:50%; transform:translateY(-50%); z-index:5; background:linear-gradient(to left,#fff 60%,transparent); border:none; cursor:pointer; padding:8px 10px; font-size:18px; color:#f68b1e; height:100%;">‹</button>
+        <div id="categories-nav" style="padding-right:36px; padding-left:36px;"></div>
+        <button onclick="document.getElementById('categories-nav').scrollBy({left:150,behavior:'smooth'})" 
+            style="position:absolute; left:0; top:50%; transform:translateY(-50%); z-index:5; background:linear-gradient(to right,#fff 60%,transparent); border:none; cursor:pointer; padding:8px 10px; font-size:18px; color:#f68b1e; height:100%;">›</button>
+    </div>
+
+    <!-- الشريط المتحرك fixed -->
+    <div id="marquee-bar" style="position:sticky; top:0; z-index:38; position:-webkit-sticky;">
+    <marquee id="marquee-text" class="py-2 px-4 text-sm" scrollamount="5" direction="right">
+        جاري جلب آخر العروض الحية من جوجل شيت...
+    </marquee>
+    </div>
+
+    <main id="main-content" class="container mx-auto px-4 mt-2" style="padding-top:4px;">
+        <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4"></div>
+    </main>
+
+    <!-- التوقيع ثابت أسفل التطبيق -->
+    <div class="neon-signature">
+        <p>The Application Developed by &nbsp;|&nbsp; Eng. Ayman Fatouh Sultan &nbsp;|&nbsp; 01011337320</p>
+    </div>
+
+    <div id="preview-modal" class="win-modal-overlay hidden">
+        <div class="win-window max-w-sm w-full shadow-2xl">
+            <div class="win-titlebar">
+                <span class="win-title"><i class="fas fa-eye"></i> تفاصيل ومعاينة المنتج</span>
+                <div class="win-controls">
+                    <div class="win-btn win-btn-min" title="تصغير">─</div>
+                    <div class="win-btn win-btn-max" title="تكبير">□</div>
+                    <div class="win-btn win-btn-close" onclick="closeModal('preview-modal')" title="إغلاق">✕</div>
+                </div>
+            </div>
+            <div class="win-body p-6 text-center border-2 border-t-0 border-[#b79457]">
+            <img id="preview-img" src="" class="w-full h-48 object-cover rounded-lg border border-gray-500 bg-white mb-3">
+            <h4 id="preview-title" class="text-sm font-bold mb-2 text-white"></h4>
+            <div id="preview-price" class="bg-[#03045e] text-white font-bold p-2 rounded-lg text-sm mb-4"></div>
+            <button id="preview-add-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1">
+                <i class="fas fa-cart-plus"></i> إضافة إلى السلة الآن
+            </button>
+            <div class="designer-bar"><span>✦ App. Designed By Eng. Ayman Sultan ✦</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cart-sidebar" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-[#0f3023] border-r-2 border-[#b79457] shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 flex flex-col hidden">
+        <div class="p-0 border-b border-[#b79457] bg-[#0b251a]">
+            <!-- شريط عنوان ويندوز للسلة -->
+            <div class="win-titlebar" style="border-radius:0;">
+                <span class="win-title"><i class="fas fa-shopping-cart"></i> سلة طلباتك
+                    <span id="cart-items-badge" class="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-bold mr-1">0</span>
+                </span>
+                <div class="win-controls">
+                    <button onclick="clearCartConfirm()" title="إفراغ السلة" class="win-btn win-btn-min text-[8px]" style="width:auto;padding:0 6px;font-size:9px;">إفراغ</button>
+                    <div class="win-btn win-btn-close" onclick="closeCartSidebar()" title="إغلاق">✕</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- شريط التقدم للسلة -->
+        <div id="cart-progress-bar" class="hidden px-4 py-2 bg-[#0b251a] border-b border-[#b79457]/30">
+            <div class="flex justify-between text-[10px] text-gray-400 mb-1">
+                <span>اقتراب من الحد الأدنى للتوصيل المجاني</span>
+                <span id="progress-amount" class="text-[#ffb703] font-bold"></span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-1.5">
+                <div id="progress-fill" class="bg-gradient-to-r from-[#b79457] to-[#ffb703] h-1.5 rounded-full transition-all duration-500" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div id="cart-items-container" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-hide"></div>
+        
+        <!-- ملخص السلة بنمط أمازون -->
+        <div id="cart-summary-section" class="p-4 border-t border-[#b79457] bg-[#0b251a] space-y-3">
+            <!-- ملخص الأسعار -->
+            <div class="bg-[#0f3023] rounded-xl p-3 border border-[#b79457]/40 space-y-1.5">
+                <p class="text-xs font-bold text-[#ffb703] mb-2 flex items-center gap-1.5"><i class="fas fa-receipt"></i> ملخص الطلب</p>
+                <div class="flex justify-between text-xs text-gray-300">
+                    <span>إجمالي المنتجات (<span id="summary-count">0</span> عنصر):</span>
+                    <span id="summary-subtotal" class="font-bold">0 ج.م</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-300">
+                    <span>رسوم التوصيل:</span>
+                    <span class="text-green-400 font-bold">يُحدد عند التأكيد</span>
+                </div>
+                <div class="border-t border-gray-600 pt-1.5 flex justify-between text-sm font-black">
+                    <span class="text-white">الإجمالي الكلي:</span>
+                    <span id="cart-total-price" class="text-[#ffb703] text-base">0 ج.م</span>
+                </div>
+            </div>
+
+            <!-- بيانات العميل -->
+            <div class="space-y-2 bg-[#0f3023] p-3 rounded-xl border border-[#b79457]/50">
+                <p class="text-xs font-bold text-[#ffb703] mb-1"><i class="fas fa-id-card"></i> بيانات استلام الطلب:</p>
+                <div>
+                    <label class="block text-[11px] text-gray-300 mb-1">الاسم الكريم <span class="text-red-500">*</span></label>
+                    <input type="text" id="client-name" class="w-full p-2 text-xs rounded bg-[#1b4332] border border-gray-600 text-white focus:outline-none focus:border-[#ffb703]" placeholder="مثال: محمد أحمد">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-300 mb-1">رقم التليفون للتواصل <span class="text-red-500">*</span></label>
+                    <input type="tel" id="client-phone" class="w-full p-2 text-xs rounded bg-[#1b4332] border border-gray-600 text-white text-left focus:outline-none focus:border-[#ffb703]" placeholder="01xxxxxxxxx">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-300 mb-1">العنوان بالتفصيل (اختياري)</label>
+                    <input type="text" id="client-address" class="w-full p-2 text-xs rounded bg-[#1b4332] border border-gray-600 text-white focus:outline-none focus:border-[#ffb703]" placeholder="الشارع، الدور، علامة مميزة">
+                </div>
+            </div>
+            
+            <button onclick="sendOrderViaWhatsApp()" class="w-full bg-[#25D366] hover:bg-green-600 text-white font-bold p-3 rounded-lg flex items-center justify-center gap-2 shadow transition text-sm">
+                <i class="fab fa-whatsapp text-xl"></i> إرسال الطلب للواتساب فوراُ
+            </button>
+        </div>
+    </div>
+
+    <a id="whatsapp-floating-btn" href="https://wa.me/201011337320" target="_blank" class="fixed bottom-6 left-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition duration-300 z-40 text-2xl flex items-center justify-center">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <div id="login-modal" class="win-modal-overlay hidden">
+        <div class="win-window max-w-md w-full shadow-2xl">
+            <div class="win-titlebar">
+                <span class="win-title"><i class="fas fa-lock"></i> تسجيل دخول النظام</span>
+                <div class="win-controls">
+                    <div class="win-btn win-btn-min">─</div>
+                    <div class="win-btn win-btn-max">□</div>
+                    <div class="win-btn win-btn-close" onclick="closeModal('login-modal')">✕</div>
+                </div>
+            </div>
+            <div class="win-body p-6 border-2 border-t-0 border-[#b79457]">
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2 text-white">أدخل كلمة مرور الصلاحية:</label>
+                <input type="password" id="system-password" class="w-full p-3 rounded bg-[#1b4332] border border-[#b79457] text-white focus:outline-none focus:ring-2 focus:ring-[#ffb703]" placeholder="••••••••">
+            </div>
+            <button onclick="verifySystemLogin()" class="w-full bg-[#b79457] text-[#132a13] font-bold p-3 rounded-lg hover:bg-[#a38146] transition">
+                دخول النظام
+            </button>
+            <div class="designer-bar"><span>✦ App. Designed By Eng. Ayman Sultan ✦</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-panel-modal" class="win-modal-overlay hidden overflow-y-auto">
+        <div class="win-window max-w-4xl w-full my-8 shadow-2xl text-white">
+            <div class="win-titlebar">
+                <span class="win-title"><i class="fas fa-tasks"></i> لوحة تحكم مدير التطبيق (Admin)</span>
+                <div class="win-controls">
+                    <div class="win-btn win-btn-min">─</div>
+                    <div class="win-btn win-btn-max">□</div>
+                    <div class="win-btn win-btn-close" onclick="closeModal('admin-panel-modal')">✕</div>
+                </div>
+            </div>
+            <div class="win-body p-6 border-2 border-t-0 border-[#b79457]">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-[#1b4332] p-4 rounded-lg border border-gray-700">
+                    <h4 class="font-bold mb-3 text-[#ffb703]"><i class="fas fa-folder-open"></i> إدارة وتعديل الأقسام بالشيت</h4>
+                    <div class="space-y-2 max-h-48 overflow-y-auto pr-2" id="categories-admin-list"></div>
+                    <div class="mt-4 pt-3 border-t border-gray-700 flex gap-2">
+                        <input type="text" id="new-category-name" class="flex-1 p-2 rounded bg-[#0f3023] border border-gray-600 text-sm" placeholder="اسم قسم جديد">
+                        <button onclick="addNewCategory()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm font-bold">إضافة قسم</button>
+                    </div>
+                </div>
+
+                <div class="bg-[#1b4332] p-4 rounded-lg border border-gray-700">
+                    <h4 class="font-bold mb-3 text-[#ffb703]"><i class="fas fa-cogs"></i> الإعدادات العامة للمنشأة</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-300">نص الشريط المتحرك الفعال:</label>
+                            <input type="text" id="input-marquee-text" class="w-full p-2 rounded bg-[#0f3023] border border-gray-600 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-300">رقم الواتساب الحالي لتلقي الطلبات:</label>
+                            <input type="text" id="input-whatsapp" class="w-full p-2 rounded bg-[#0f3023] border border-gray-600 text-sm">
+                        </div>
+                        <button onclick="saveGeneralSettings()" class="w-full bg-blue-600 hover:bg-blue-700 p-2 rounded text-sm font-bold mt-2">
+                            حفظ ومزامنة الإعدادات للشيت
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-[#1b4332] p-4 rounded-lg border border-gray-700 md:col-span-2">
+                    <h4 class="font-bold mb-3 text-[#ffb703]"><i class="fas fa-box-open"></i> إضافة أو تعديل منتج سحابي</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-300">القسم المربوط:</label>
+                            <select id="prod-category" class="w-full p-2 rounded bg-[#0f3023] border border-gray-600 text-sm text-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-300">رقم المنتج (المعرف الرقمي):</label>
+                            <input type="number" id="prod-id" class="w-full p-2 rounded bg-[#0f3023] border border-gray-600 text-sm" placeholder="مثال: 1">
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-300">رفع أو التقاط صورة المنتج:</label>
+                            <div class="flex gap-2 items-center flex-wrap">
+                                <input type="file" id="prod-image-file" accept="image/*" class="flex-1 p-1 rounded bg-[#0f3023] border border-gray-600 text-xs text-white min-w-0" style="min-width:80px;">
+                                <!-- زر الكاميرا الذكي: موبيل = capture مباشر / ديسكتوب = نافذة video -->
+                                <button type="button" onclick="openCameraCapture()" title="التقاط صورة بالكاميرا الخلفية" 
+                                    class="flex-shrink-0 bg-[#b79457] hover:bg-[#9a7b44] text-white rounded-lg px-3 py-2 flex items-center justify-center gap-1.5 text-xs font-bold shadow transition-all hover:scale-105 border border-[#ffb703]/40">
+                                    <i class="fas fa-camera text-sm"></i>
+                                    <span class="hidden sm:inline">كاميرا</span>
+                                </button>
+                                <!-- زر إضافي للكاميرا الأمامية على الموبيل -->
+                                <button type="button" onclick="currentFacingMode='user'; openCameraCapture();" title="كاميرا سيلفي أمامية"
+                                    class="flex-shrink-0 bg-[#1b4332] hover:bg-[#0f3023] border border-[#b79457] text-white rounded-lg px-3 py-2 flex items-center justify-center gap-1.5 text-xs font-bold shadow transition-all hover:scale-105">
+                                    <i class="fas fa-user text-sm"></i>
+                                </button>
+                            </div>
+                            <!-- معاينة الصورة المختارة أو الملتقطة -->
+                            <div id="img-preview-wrap" class="hidden mt-2">
+                                <div class="relative inline-block">
+                                    <img id="img-preview-thumb" src="" class="w-16 h-16 object-cover rounded-lg border-2 border-[#b79457] shadow">
+                                    <button onclick="clearImagePreview()" class="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg">×</button>
+                                </div>
+                                <p class="text-[10px] text-green-400 mt-1"><i class="fas fa-check-circle"></i> تم اختيار الصورة بنجاح</p>
+                            </div>
+                        </div>
+                        <!-- Modal الكاميرا الاحترافية -->
+                        <div id="camera-modal" class="win-modal-overlay z-[60] hidden">
+                            <div class="win-window w-full max-w-md mx-4 shadow-2xl">
+                                <div class="win-titlebar">
+                                    <span class="win-title"><i class="fas fa-camera"></i> التقاط صورة المنتج</span>
+                                    <div class="win-controls">
+                                        <div class="win-btn win-btn-min">─</div>
+                                        <div class="win-btn win-btn-max">□</div>
+                                        <div class="win-btn win-btn-close" onclick="closeCameraModal()">✕</div>
+                                    </div>
+                                </div>
+                                <div class="win-body p-4 border-2 border-t-0 border-[#b79457]">
+                                    <div class="relative bg-black rounded-xl overflow-hidden mb-4" style="aspect-ratio:4/3;">
+                                        <video id="camera-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                                        <canvas id="camera-canvas" class="hidden"></canvas>
+                                        <!-- إطار التصويب -->
+                                        <div class="absolute inset-0 pointer-events-none">
+                                            <div class="absolute top-3 left-3 w-8 h-8 border-t-4 border-l-4 border-[#ffb703] rounded-tl-lg opacity-80"></div>
+                                            <div class="absolute top-3 right-3 w-8 h-8 border-t-4 border-r-4 border-[#ffb703] rounded-tr-lg opacity-80"></div>
+                                            <div class="absolute bottom-3 left-3 w-8 h-8 border-b-4 border-l-4 border-[#ffb703] rounded-bl-lg opacity-80"></div>
+                                            <div class="absolute bottom-3 right-3 w-8 h-8 border-b-4 border-r-4 border-[#ffb703] rounded-br-lg opacity-80"></div>
+                                        </div>
+                                        <!-- مؤشر الكاميرا النشطة -->
+                                        <div class="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/60 px-3 py-1 rounded-full">
+                                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                            <span class="text-white text-[10px] font-bold">كاميرا نشطة</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <button onclick="switchCamera()" class="flex-1 bg-[#1b4332] hover:bg-[#0f3023] border border-[#b79457] text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition">
+                                            <i class="fas fa-sync-alt"></i> تحويل الكاميرا
+                                        </button>
+                                        <button onclick="capturePhoto()" class="flex-1 bg-[#b79457] hover:bg-[#9a7b44] text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition shadow-lg">
+                                            <i class="fas fa-circle text-red-400 text-lg"></i> التقاط الصورة
+                                        </button>
+                                    </div>
+                                </div>
+                                </div><!-- end win-body -->
+                            </div><!-- end win-window -->
+                        </div><!-- end camera-modal -->
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-300">وصف المنتج الاسمي الكامل:</label>
+                            <input type="text" id="prod-title" class="w-full p-2 rounded bg-[#0f3023] border border-gray-600 text-sm" placeholder="اسم ووصف السلعة">
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-300">السعر الحالي:</label>
+                            <input type="text" id="prod-price" class="w-full p-2 rounded bg-[#0f3023] border border-gray-600 text-sm" placeholder="مثال: 25 ج.م">
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button onclick="deleteProductData()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-bold">حذف المنتج</button>
+                        <button onclick="saveProductDataSCloud()" id="btn-save-prod" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold flex items-center gap-1">
+                            <i class="fas fa-cloud-upload-alt"></i> حفظ ورفع للشيت فوراُ
+                        </button>
+                    </div>
+                </div>
+            </div>
+    </div><!-- end admin-panel-modal -->
+
+    <div id="super-admin-modal" class="win-modal-overlay hidden">
+        <div class="win-window max-w-lg w-full shadow-2xl text-white">
+            <div class="win-titlebar" style="background: linear-gradient(180deg, #7a3c00 0%, #5a2c00 40%, #3a1a00 100%); border-bottom-color: #7a3c00;">
+                <span class="win-title"><i class="fas fa-crown"></i> لوحة تحكم المطور والمنشئ الأعلى</span>
+                <div class="win-controls">
+                    <div class="win-btn win-btn-min">─</div>
+                    <div class="win-btn win-btn-max">□</div>
+                    <div class="win-btn win-btn-close" onclick="closeModal('super-admin-modal')">✕</div>
+                </div>
+            </div>
+            <div class="win-body p-6 border-2 border-t-0 border-[#ffb703]" style="background:#0b1a14;">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-300">تغيير اسم التطبيق العام:</label>
+                    <input type="text" id="super-app-title" class="w-full p-3 rounded bg-[#1b4332] border border-[#ffb703] text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-300">تعديل كلمة سر مدير الفرع:</label>
+                    <input type="text" id="super-app-password" class="w-full p-3 rounded bg-[#1b4332] border border-[#ffb703] text-white text-sm">
+                </div>
+                <div class="pt-2">
+                    <button onclick="saveSuperAdminSettings()" class="w-full bg-[#ffb703] text-[#132a13] font-bold p-3 rounded-lg hover:bg-yellow-500 transition mb-3">
+                        حفظ واعتماد تهيئة التطبيق الجديد
+                    </button>
+                    <button onclick="triggerResetSystem()" class="w-full bg-red-700 text-white font-bold p-3 rounded-lg hover:bg-red-800 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i> عمل Reset كامل وتصفير الداتا سحابياً
+                    </button>
+                </div>
+            </div>
+            <div class="designer-bar"><span>✦ App. Designed By Eng. Ayman Sultan ✦</span></div>
+            </div><!-- end win-body -->
+        </div><!-- end win-window -->
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuH9ANKrQYaQ7yVtbJ8J-1tYjXjb5qjmHkccIAmlFwLDF7mL5Tf3oRajl1KNRHb2CjYg/exec"; 
+
+        const defaultCategories = ["الكل", "عروض وخصومات اليوم", "السلع الاساسية"];
+        let appCategories = JSON.parse(localStorage.getItem('app_categories')) || defaultCategories;
+        let appProducts = JSON.parse(localStorage.getItem('app_products')) || [];
+        let systemConfig = JSON.parse(localStorage.getItem('system_config')) || {
+            appName: "متجر سوبر ماركت",
+            managerPassword: "gam",
+            marqueeText: "أهلاً بالسادة الزائرين * متجر سوبر ماركت يرحب بكم وكل عام وانتم بخير",
+            whatsapp: "201011337320"
+        };
+
+        let currentActiveCategory = localStorage.getItem('last_active_category') || "الكل";
+        // السلة تبدأ فارغة مع كل جلسة جديدة (sessionStorage تُمسح عند إغلاق المتصفح)
+        let cart = JSON.parse(sessionStorage.getItem('app_cart_session')) || [];
+
+        window.onload = function() {
+            initSystemData();
+            renderCategories();
+            renderProducts();
+            updateCartUI();
+            fetchCloudData();
+            setInterval(fetchCloudData, 15000);
+
+            // ضبط top للشريطين الثابتين بعد الهيدر
+            function fixStickyBars() {
+                const header = document.querySelector('header');
+                const catsBar = document.getElementById('cats-bar');
+                const marqueeBar = document.getElementById('marquee-bar');
+                if (!header || !catsBar) return;
+                const hh = header.offsetHeight;
+                catsBar.style.top = hh + 'px';
+                if (marqueeBar) {
+                    const ch = catsBar.offsetHeight;
+                    marqueeBar.style.top = (hh + ch) + 'px';
+                    // دفع المحتوى الرئيسي للأسفل
+                    const main = document.getElementById('main-content');
+                    if (main) main.style.paddingTop = (marqueeBar.offsetHeight + 6) + 'px';
+                }
+            }
+            fixStickyBars();
+            window.addEventListener('resize', fixStickyBars);
+        };
+
+        function initSystemData() {
+            document.title = systemConfig.appName;
+            const nameEl = document.getElementById('app-display-name');
+            if (nameEl) nameEl.querySelector('span').innerText = systemConfig.appName;
+            document.getElementById('marquee-text').innerText = systemConfig.marqueeText;
+            document.getElementById('whatsapp-floating-btn').href = "https://wa.me/" + systemConfig.whatsapp;
+            document.getElementById('input-marquee-text').value = systemConfig.marqueeText;
+            document.getElementById('input-whatsapp').value = systemConfig.whatsapp;
+            document.getElementById('super-app-title').value = systemConfig.appName;
+            document.getElementById('super-app-password').value = systemConfig.managerPassword;
+        }
+
+        function fetchCloudData() {
+            if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) return;
+            
+            fetch(`${APPS_SCRIPT_URL}?action=getData`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.products) {
+                    appProducts = data.products;
+                    localStorage.setItem('app_products', JSON.stringify(appProducts));
+                }
+                if(data.categories && data.categories.length > 0) {
+                    appCategories = data.categories;
+                    localStorage.setItem('app_categories', JSON.stringify(appCategories));
+                }
+                if(data.config) {
+                    const savedPassword = systemConfig.managerPassword;
+                    systemConfig = data.config;
+                    systemConfig.managerPassword = savedPassword;
+                    localStorage.setItem('system_config', JSON.stringify(systemConfig));
+                    initSystemData();
+                }
+                renderCategories();
+                renderProducts();
+            })
+            .catch(err => console.log("البحث عن تحديثات الداتا سحابياً..."));
+        }
+
+        function renderCategories() {
+            const nav = document.getElementById('categories-nav');
+            nav.innerHTML = '';
+            
+            appCategories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition bg-[#0f3023] border border-[#b79457] text-white hover:bg-[#b79457] hover:text-[#132a13]`;
+                if(cat === currentActiveCategory) btn.classList.add('active-tab');
+                btn.innerText = cat;
+                btn.onclick = () => {
+                    currentActiveCategory = cat;
+                    localStorage.setItem('last_active_category', cat);
+                    renderCategories();
+                    renderProducts();
+                };
+                nav.appendChild(btn);
+            });
+
+            const select = document.getElementById('prod-category');
+            select.innerHTML = '';
+            appCategories.forEach(cat => {
+                if(cat === "الكل") return;
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+
+            const adminList = document.getElementById('categories-admin-list');
+            adminList.innerHTML = '';
+            appCategories.forEach((cat, idx) => {
+                if(cat === "الكل") return;
+                const row = document.createElement('div');
+                row.className = "flex items-center gap-2 bg-[#0f3023] p-2 rounded border border-gray-600";
+                row.innerHTML = `
+                    <input type="text" value="${cat}" onchange="updateCategoryName(${idx}, this.value)" class="flex-1 bg-transparent border-b border-gray-500 text-sm px-1 focus:outline-none focus:border-[#ffb703]">
+                    <button onclick="deleteCategory(${idx})" class="text-red-500 hover:text-red-400 text-xs px-2"><i class="fas fa-trash-alt"></i></button>
+                `;
+                adminList.appendChild(row);
+            });
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+
+            let filtered = appProducts;
+            if (currentActiveCategory !== "الكل") {
+                filtered = appProducts.filter(p => p.category === currentActiveCategory);
+            }
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-300 text-sm">لا توجد منتجات مضافة لهذا القسم في الشيت حالياً.</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "product-card rounded-xl overflow-hidden shadow-md p-2 flex flex-col justify-between text-right relative";
+                
+                card.innerHTML = `
+                    <div class="relative w-full">
+                        <span class="absolute top-1 right-1 bg-[#132a13]/90 text-[#ffb703] font-bold text-[10px] px-2 py-0.5 rounded-md z-10 shadow border border-[#b79457]">
+                            #${p.id}
+                        </span>
+                        <img src="${p.image}" class="w-full h-24 sm:h-28 object-cover rounded-lg mb-1.5 border border-gray-300 bg-white shadow-sm" alt="صورة المنتج">
+                        <h4 class="text-xs font-bold text-main-black line-clamp-2 px-0.5 leading-tight min-h-[2.2rem]">${p.title}</h4>
+                    </div>
+                    
+                    <div>
+                        <div class="price-badge rounded-md px-2 py-1 my-1 text-center font-black text-xs shadow-inner tracking-wide">
+                            ${p.price}
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-1.5 mt-1.5">
+                            <button onclick="previewProduct('${p.category}', ${p.id})" class="bg-[#b79457] hover:bg-[#9a7b44] text-white py-1.5 rounded-lg text-xs shadow transition flex items-center justify-center" title="معاينة السلعة">
+                                <i class="fas fa-search text-[11px]"></i>
+                            </button>
+                            <button onclick="addToCart('${p.category}', ${p.id})" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded-lg text-xs shadow transition flex items-center justify-center" title="إضافة للسلة">
+                                <i class="fas fa-shopping-cart text-[11px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function previewProduct(category, id) {
+            const prod = appProducts.find(p => p.category === category && p.id === id);
+            if(!prod) return;
+            document.getElementById('preview-img').src = prod.image;
+            document.getElementById('preview-title').innerText = prod.title;
+            document.getElementById('preview-price').innerText = "السعر الحالي: " + prod.price;
+            
+            const addBtn = document.getElementById('preview-add-btn');
+            addBtn.onclick = () => {
+                addToCart(category, id);
+                closeModal('preview-modal');
+            };
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        function syncDataToCloud(payload, successMessage) {
+            if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
+                alert(successMessage + " (محفوظ محلياً بنجاح)");
+                return;
+            }
+            fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert(successMessage + " وتمت المزامنة السحابية بنجاح!");
+                fetchCloudData();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("تم التعديل وجاري مزامنة الداتا سحابياً خلف الكواليس...");
+            });
+        }
+
+        function openCartSidebar() {
+            const sidebar = document.getElementById('cart-sidebar');
+            sidebar.classList.remove('hidden');
+            setTimeout(() => sidebar.classList.remove('-translate-x-full'), 10);
+        }
+
+        function closeCartSidebar() {
+            const sidebar = document.getElementById('cart-sidebar');
+            sidebar.classList.add('-translate-x-full');
+            setTimeout(() => sidebar.classList.add('hidden'), 300);
+            // الطلبات تبقى ولا تُحذف عند الإغلاق
+        }
+
+        function toggleCartSidebar() {
+            const sidebar = document.getElementById('cart-sidebar');
+            if(sidebar.classList.contains('hidden') || sidebar.classList.contains('-translate-x-full')) {
+                openCartSidebar();
+            } else {
+                closeCartSidebar();
+            }
+        }
+
+        function removeCartItem(idx) {
+            cart.splice(idx, 1);
+            sessionStorage.setItem('app_cart_session', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function clearCartConfirm() {
+            if(cart.length === 0) return;
+            if(confirm('هل تريد إفراغ السلة بالكامل وحذف جميع المنتجات المضافة؟')) {
+                cart = [];
+                sessionStorage.setItem('app_cart_session', JSON.stringify(cart));
+                updateCartUI();
+            }
+        }
+
+        function addToCart(category, id) {
+            const prod = appProducts.find(p => p.category === category && p.id === id);
+            if(!prod) return;
+
+            const existingItem = cart.find(item => item.category === category && item.id === id);
+            if(existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({ category: prod.category, id: prod.id, title: prod.title, price: prod.price, image: prod.image, qty: 1 });
+            }
+            sessionStorage.setItem('app_cart_session', JSON.stringify(cart));
+            updateCartUI();
+            
+            const sidebar = document.getElementById('cart-sidebar');
+            if(sidebar.classList.contains('hidden') || sidebar.classList.contains('-translate-x-full')) openCartSidebar();
+        }
+
+        function updateCartQty(idx, delta) {
+            cart[idx].qty += delta;
+            if(cart[idx].qty <= 0) cart.splice(idx, 1);
+            sessionStorage.setItem('app_cart_session', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const countTag = document.getElementById('cart-count');
+            const totalTag = document.getElementById('cart-total-price');
+            const badge = document.getElementById('cart-items-badge');
+            const summaryCount = document.getElementById('summary-count');
+            const summarySubtotal = document.getElementById('summary-subtotal');
+            
+            container.innerHTML = '';
+            let totalCount = 0;
+            let totalPrice = 0;
+
+            cart.forEach((item, idx) => {
+                totalCount += item.qty;
+                const numPrice = parseFloat(item.price.replace(/[^\d.]/g, '')) || 0;
+                const subTotal = numPrice * item.qty;
+                totalPrice += subTotal;
+
+                const div = document.createElement('div');
+                div.className = "bg-[#1b4332] border border-[#b79457]/60 p-2.5 rounded-xl flex gap-3 items-start text-white relative shadow-sm hover:border-[#b79457] transition-all";
+                div.innerHTML = `
+                    <!-- زر × لحذف المنتج من السلة -->
+                    <button onclick="removeCartItem(${idx})" title="حذف هذا المنتج من السلة" class="absolute top-1.5 left-1.5 w-5 h-5 bg-red-600 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow transition-all hover:scale-110 z-10">×</button>
+                    
+                    <img src="${item.image}" class="w-14 h-14 object-cover rounded-lg bg-white border border-gray-500 flex-shrink-0 shadow">
+                    
+                    <div class="flex-1 text-right min-w-0 pr-0 pl-1">
+                        <h5 class="text-xs font-bold line-clamp-2 leading-tight mb-1">${item.title}</h5>
+                        <p class="text-[11px] text-[#b79457] mb-0.5">القسم: ${item.category}</p>
+                        <p class="text-[11px] text-[#ffb703] font-black">${item.price} × ${item.qty} = <span class="text-green-400">${subTotal.toFixed(0)} ج.م</span></p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                        <button onclick="updateCartQty(${idx}, 1)" class="w-7 h-7 bg-[#b79457] hover:bg-[#ffb703] text-[#132a13] rounded-lg text-sm font-black flex items-center justify-center transition hover:scale-110 shadow">+</button>
+                        <span class="text-sm font-black text-white w-7 text-center">${item.qty}</span>
+                        <button onclick="updateCartQty(${idx}, -1)" class="w-7 h-7 bg-[#0f3023] hover:bg-red-700 border border-[#b79457]/50 text-white rounded-lg text-sm font-black flex items-center justify-center transition hover:scale-110 shadow">−</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            countTag.innerText = totalCount;
+            if (badge) badge.innerText = totalCount;
+            if (summaryCount) summaryCount.innerText = totalCount;
+            if (summarySubtotal) summarySubtotal.innerText = totalPrice.toFixed(0) + " ج.م";
+            totalTag.innerText = totalPrice.toFixed(0) + " ج.م";
+
+            // شريط تقدم التوصيل المجاني (عند 300 ج.م)
+            const freeDeliveryThreshold = 300;
+            const progressBar = document.getElementById('cart-progress-bar');
+            const progressFill = document.getElementById('progress-fill');
+            const progressAmount = document.getElementById('progress-amount');
+            if (cart.length > 0 && progressBar) {
+                progressBar.classList.remove('hidden');
+                const pct = Math.min((totalPrice / freeDeliveryThreshold) * 100, 100);
+                progressFill.style.width = pct + '%';
+                if(totalPrice >= freeDeliveryThreshold) {
+                    progressAmount.innerText = '🎉 مؤهل للتوصيل المجاني!';
+                    progressAmount.className = 'text-green-400 font-bold text-[10px]';
+                } else {
+                    const remaining = (freeDeliveryThreshold - totalPrice).toFixed(0);
+                    progressAmount.innerText = remaining + ' ج.م متبقية';
+                    progressAmount.className = 'text-[#ffb703] font-bold text-[10px]';
+                }
+            } else if(progressBar) {
+                progressBar.classList.add('hidden');
+            }
+            
+            if(cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-14 px-4">
+                        <i class="fas fa-shopping-basket text-5xl text-gray-600 mb-4 block"></i>
+                        <p class="text-gray-400 text-sm font-bold mb-1">السلة فارغة حالياً</p>
+                        <p class="text-gray-500 text-xs">أضف منتجات من القائمة لتبدأ طلبك!</p>
+                    </div>`;
+            }
+        }
+
+        // دالة التحقق من حقول العميل وتوليد ترتيب الرسالة العالمي للواتساب
+        function sendOrderViaWhatsApp() {
+            if(cart.length === 0) return alert('السلة فارغة حالياً! يرجى إضافة المنتجات أولاً.');
+            
+            // جلب مدخلات العميل وتجهيزها
+            const clientName = document.getElementById('client-name').value.trim();
+            const clientPhone = document.getElementById('client-phone').value.trim();
+            const clientAddress = document.getElementById('client-address').value.trim() || "غير محدد";
+
+            // فحص الشروط الإجبارية (الاسم والتليفون)
+            if(!clientName || !clientPhone) {
+                alert('عذراً! حقول الاسم ورقم التليفون إجبارية لضمان توصيل طلبك بنجاح.');
+                return;
+            }
+
+            // صياغة وترتيب نص الرسالة (الطلبات أولاً ثم بيانات العميل)
+            let message = `*طلب جديد من عميل*%0A`;
+            message += `==========================%0A`;
+            
+            let total = 0;
+            cart.forEach((item, idx) => {
+                const numPrice = parseFloat(item.price.replace(/[^\d.]/g, '')) || 0;
+                const subTotal = numPrice * item.qty;
+                total += subTotal;
+                message += `${idx + 1}- *${item.title}*%0A      العدد: ${item.qty} | السعر: ${item.price}%0A`;
+            });
+            
+            message += `==========================%0A`;
+            message += `*إجمالي الحساب:* ${total} ج.م%0A`;
+            message += `==========================%0A%0A`;
+            
+            // إدراج بيانات العميل في أسفل نص الرسالة بالترتيب المطلق
+            message += `*الاسم:* ${clientName}%0A`;
+            message += `*التليفون:* ${clientPhone}%0A`;
+            message += `*العنوان:* ${clientAddress}`;
+            
+            window.open(`https://wa.me/${systemConfig.whatsapp}?text=${message}`, '_blank');
+            
+            // إفراغ السلة بعد إرسال الطلب بنجاح
+            cart = [];
+            sessionStorage.setItem('app_cart_session', JSON.stringify(cart));
+            updateCartUI();
+            closeCartSidebar();
+        }
+
+        // ===== وظائف الكاميرا الاحترافية =====
+        let cameraStream = null;
+        let currentFacingMode = 'environment'; // الكاميرا الخلفية بالافتراضي
+
+        // ======= كشف نوع الجهاز =======
+        function isMobileDevice() {
+            return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        }
+
+        // ======= فتح الكاميرا =======
+        function openCameraCapture() {
+            if (isMobileDevice()) {
+                // الموبيل: استخدام input capture المباشر — يفتح كاميرا الجهاز فوراً
+                useMobileCameraInput();
+            } else {
+                // الديسكتوب: فتح نافذة الـ video stream
+                const modal = document.getElementById('camera-modal');
+                modal.classList.remove('hidden');
+                startCamera();
+            }
+        }
+
+        // ======= طريقة الموبيل: input capture مباشر =======
+        function useMobileCameraInput() {
+            // إنشاء input مؤقت بخاصية capture لفتح الكاميرا مباشرة
+            let mobileInput = document.getElementById('mobile-camera-input');
+            if (!mobileInput) {
+                mobileInput = document.createElement('input');
+                mobileInput.type = 'file';
+                mobileInput.id = 'mobile-camera-input';
+                mobileInput.accept = 'image/*';
+                mobileInput.capture = 'environment'; // الكاميرا الخلفية
+                mobileInput.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;width:1px;height:1px;';
+                document.body.appendChild(mobileInput);
+
+                mobileInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const file = this.files[0];
+                        // نسخ الملف لـ input الأصلي
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        document.getElementById('prod-image-file').files = dt.files;
+                        // عرض المعاينة
+                        const url = URL.createObjectURL(file);
+                        document.getElementById('img-preview-thumb').src = url;
+                        document.getElementById('img-preview-wrap').classList.remove('hidden');
+                        // إعادة ضبط الـ input المؤقت
+                        this.value = '';
+                    }
+                });
+            }
+            // تغيير الكاميرا بين أمامية وخلفية
+            mobileInput.capture = currentFacingMode === 'environment' ? 'environment' : 'user';
+            mobileInput.click();
+        }
+
+        function closeCameraModal() {
+            stopCamera();
+            document.getElementById('camera-modal').classList.add('hidden');
+        }
+
+        // ======= تشغيل الكاميرا (للديسكتوب) =======
+        async function startCamera() {
+            stopCamera();
+            const video = document.getElementById('camera-video');
+            video.style.display = 'block';
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showCameraError('متصفحك لا يدعم الكاميرا. يرجى استخدام Chrome أو Firefox.');
+                return;
+            }
+
+            const constraints = [
+                { video: { facingMode: { exact: currentFacingMode }, width: { ideal: 1280 }, height: { ideal: 960 } } },
+                { video: { facingMode: currentFacingMode } },
+                { video: true }
+            ];
+
+            for (let c of constraints) {
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia(c);
+                    video.srcObject = cameraStream;
+                    // انتظار بدء التشغيل الفعلي
+                    await video.play().catch(() => {});
+                    hideCameraError();
+                    return;
+                } catch(err) {
+                    console.log('Camera attempt failed:', err.name, err.message);
+                }
+            }
+
+            showCameraError('تعذّر الوصول إلى الكاميرا. يُرجى السماح بالإذن من إعدادات المتصفح.');
+        }
+
+        function showCameraError(msg) {
+            const modal = document.getElementById('camera-modal');
+            let errDiv = modal.querySelector('.camera-error-msg');
+            if (!errDiv) {
+                errDiv = document.createElement('div');
+                errDiv.className = 'camera-error-msg bg-red-800/80 text-white text-xs p-3 rounded-lg mb-3 text-center';
+                const videoWrap = modal.querySelector('.relative.bg-black');
+                if (videoWrap) videoWrap.after(errDiv);
+                else modal.querySelector('.win-body').prepend(errDiv);
+            }
+            errDiv.innerHTML = `<i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> ${msg}
+                <br><button onclick="closeCameraModal()" class="mt-2 bg-[#b79457] text-black font-bold px-4 py-1 rounded-lg text-xs">إغلاق والرفع يدوياً</button>`;
+        }
+
+        function hideCameraError() {
+            const errDiv = document.querySelector('.camera-error-msg');
+            if (errDiv) errDiv.remove();
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        async function switchCamera() {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            if (isMobileDevice()) {
+                // على الموبيل: أعد فتح الكاميرا بالاتجاه الجديد
+                closeCameraModal();
+                useMobileCameraInput();
+            } else {
+                await startCamera();
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('camera-video');
+            const canvas = document.getElementById('camera-canvas');
+            if (!video.videoWidth) {
+                showCameraError('الكاميرا لم تبدأ بعد. انتظر لحظة ثم حاول مجدداً.');
+                return;
+            }
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], `product_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                document.getElementById('prod-image-file').files = dt.files;
+                const url = URL.createObjectURL(blob);
+                document.getElementById('img-preview-thumb').src = url;
+                document.getElementById('img-preview-wrap').classList.remove('hidden');
+                closeCameraModal();
+            }, 'image/jpeg', 0.92);
+        }
+
+        // معاينة الصورة عند الاختيار من الملفات
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('prod-image-file');
+            if(fileInput) {
+                fileInput.addEventListener('change', function() {
+                    if(this.files && this.files[0]) {
+                        const url = URL.createObjectURL(this.files[0]);
+                        document.getElementById('img-preview-thumb').src = url;
+                        document.getElementById('img-preview-wrap').classList.remove('hidden');
+                    }
+                });
+            }
+        });
+
+        function clearImagePreview() {
+            document.getElementById('prod-image-file').value = '';
+            document.getElementById('img-preview-thumb').src = '';
+            document.getElementById('img-preview-wrap').classList.add('hidden');
+        }
+
+        function openLoginModal() {
+            document.getElementById('system-password').value = '';
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function verifySystemLogin() {
+            const pass = document.getElementById('system-password').value.trim();
+            if (pass === "app") {
+                closeModal('login-modal');
+                document.getElementById('admin-panel-modal').classList.remove('hidden');
+            } else if (pass === "AS-ayman") {
+                closeModal('login-modal');
+                document.getElementById('super-admin-modal').classList.remove('hidden');
+            } else {
+                alert('عذراً! كلمة السر غير صحيحة.');
+            }
+        }
+
+        function saveProductDataSCloud() {
+            const cat = document.getElementById('prod-category').value;
+            const id = parseInt(document.getElementById('prod-id').value);
+            const title = document.getElementById('prod-title').value.trim();
+            const price = document.getElementById('prod-price').value.trim();
+            const fileInput = document.getElementById('prod-image-file');
+            const btnSave = document.getElementById('btn-save-prod');
+
+            if(!id || !title || !price) return alert('يرجى ملء جميع الحقول المطلوبة (رقم المنتج - الوصف - السعر).');
+
+            let productData = {
+                action: "saveProduct",
+                category: cat,
+                id: id,
+                title: title,
+                price: price,
+                image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300"
+            };
+
+            const existingIndex = appProducts.findIndex(p => p.category === cat && p.id === id);
+            if(existingIndex > -1 && !fileInput.files[0]) {
+                productData.image = appProducts[existingIndex].image;
+            }
+
+            if (fileInput.files[0]) {
+                btnSave.disabled = true;
+                btnSave.innerText = "جاري رفع الصورة لـ Drive...";
+                
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Data = e.target.result.split(',')[1];
+                    productData.imageFile = base64Data;
+                    productData.imageType = file.type;
+                    productData.imageName = `prod_${cat}_${id}`;
+                    executeCloudPost(productData, "تم حفظ المنتج وتحديث الشيت بنجاح");
+                };
+                reader.readAsDataURL(file);
+            } else {
+                executeCloudPost(productData, "تم تحديث بيانات المنتج في الشيت بنجاح");
+            }
+        }
+
+        function executeCloudPost(payload, successMsg) {
+            const btnSave = document.getElementById('btn-save-prod');
+            if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> حفظ ورفع للشيت فوراُ`;
+                alert(successMsg + " (محلياً)");
+                return;
+            }
+
+            fetch(APPS_SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
+            .then(() => {
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> حفظ ورفع للشيت فوراُ`;
+                document.getElementById('prod-image-file').value = '';
+                alert(successMsg);
+                fetchCloudData();
+            })
+            .catch(() => {
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> حفظ ورفع للشيت فوراُ`;
+                fetchCloudData();
+            });
+        }
+
+        function deleteProductData() {
+            const cat = document.getElementById('prod-category').value;
+            const id = parseInt(document.getElementById('prod-id').value);
+            if(!id) return alert('يرجى تحديد رقم المنتج.');
+
+            if(confirm(`تأكيد مسح منتج رقم ${id} من الشيت سحابياً؟`)) {
+                syncDataToCloud({ action: "deleteProduct", category: cat, id: id }, `تم إزالة كارت المنتج رقم ${id}`);
+            }
+        }
+
+        function updateCategoryName(index, newName) {
+            if(!newName.trim()) return;
+            const oldName = appCategories[index];
+            appCategories[index] = newName.trim();
+            syncDataToCloud({ action: "saveCategories", categories: appCategories, oldName: oldName, newName: newName.trim() }, "تم حفظ اسم القسم الجديد بالشيت");
+        }
+
+        function addNewCategory() {
+            const name = document.getElementById('new-category-name').value.trim();
+            if(!name) return alert('برجاء كتابة مسمى القسم أولاً');
+            if(appCategories.includes(name)) return alert('هذا القسم موجود بالفعل!');
+            
+            appCategories.push(name);
+            document.getElementById('new-category-name').value = '';
+            syncDataToCloud({ action: "saveCategories", categories: appCategories }, "تم إضافة قسم جديد للشيت");
+        }
+
+        function deleteCategory(index) {
+            if(confirm('مسح القسم السحابي بالكامل مع داتا منتجاته من الشيت؟')) {
+                const catName = appCategories[index];
+                appCategories.splice(index, 1);
+                syncDataToCloud({ action: "deleteCategory", category: catName, categories: appCategories }, "تم حذف القسم وملحقاته من الشيت");
+            }
+        }
+
+        function saveGeneralSettings() {
+            systemConfig.marqueeText = document.getElementById('input-marquee-text').value;
+            systemConfig.whatsapp = document.getElementById('input-whatsapp').value;
+            syncDataToCloud({ action: "saveConfig", config: systemConfig }, "تم تحديث صفحة Config بالشيت");
+        }
+
+        function saveSuperAdminSettings() {
+            const newTitle = document.getElementById('super-app-title').value.trim();
+            const newPass = document.getElementById('super-app-password').value.trim();
+            if(!newTitle || !newPass) return alert('يرجى تعبئة الحقول بالكامل.');
+
+            systemConfig.appName = newTitle;
+            systemConfig.managerPassword = newPass;
+            closeModal('super-admin-modal');
+            syncDataToCloud({ action: "saveConfig", config: systemConfig }, "تم إعادة تهيئة مواصفات التطبيق بالشيت");
+        }
+
+        function triggerResetSystem() {
+            if(confirm('تنبيه خطير: هل أنت متأكد من عمل مسح شامل وتصفير للشيتات سحابياً؟')) {
+                localStorage.clear();
+                closeModal('super-admin-modal');
+                syncDataToCloud({ action: "resetSystem", categories: ["الكل"], config: { appName: "متجر جديد", managerPassword: "gam", marqueeText: "أهلاً بكم", whatsapp: "201011337320" } }, "تم تصفير الداتا السحابية بالشيت بنجاح");
+            }
+        }
+    </script>
+</body>
+</html>
